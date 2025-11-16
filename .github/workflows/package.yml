@@ -27,7 +27,7 @@ jobs:
       run: rake package
       working-directory: examples/${{ matrix.example }}
     - name: Build
-      if: matrix.example != 'gems'
+      if: matrix.example != 'hello'
       run: bundle exec rake package
       working-directory: examples/${{ matrix.example }}
     - name: Show standalone packages
