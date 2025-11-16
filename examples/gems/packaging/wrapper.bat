@@ -11,7 +11,7 @@ set BUNDLE_APP_CONFIG=
 set BUNDLE_FROZEN=1
 
 :: Run the actual app using the bundled Ruby interpreter, with Bundler activated.
-@"%ROOT_PATH%\lib\ruby\bin\ruby.bat" "%ROOT_PATH%\lib\app\hello.rb" %*
+@"%ROOT_PATH%\lib\ruby\bin\ruby.bat" -rbundler/setup  -I "%ROOT_PATH%\lib\app\lib" "%ROOT_PATH%\lib\app\hello.rb" %*
 
 GOTO :EOF
 
