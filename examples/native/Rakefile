@@ -102,6 +102,20 @@ def create_package(version, target, os_type)
   end
   sh "cp -pR build/vendor #{package_dir}/lib/"
   sh "cp packaging/Gemfile packaging/Gemfile.lock #{package_dir}/lib/vendor/"
+
+  # If packaging for Windows, patch Gemfile.lock for nokogiri platform as we are building platform specific gems with rake-compiler-dock
+  if os_type == :windows
+    lockfile = "#{package_dir}/lib/vendor/Gemfile.lock"
+    if File.exist?(lockfile)
+    content = File.read(lockfile)
+    if content =~ /^    nokogiri \(#{NATIVE_GEM_VERSIONS[ :nokogiri ]}\)/
+      arch = target.include?("arm64") ? "-aarch64-mingw-ucrt" : "-x64-mingw-ucrt"
+      patched = content.gsub(/^    nokogiri \(#{NATIVE_GEM_VERSIONS[ :nokogiri ]}\)/, "    nokogiri (#{NATIVE_GEM_VERSIONS[ :nokogiri ]}#{arch})")
+      File.write(lockfile, patched)
+    end
+    end
+  end
+
   sh "mkdir #{package_dir}/lib/vendor/.bundle"
   sh "cp packaging/bundler-config #{package_dir}/lib/vendor/.bundle/config"
   download_and_unpack_ext(package_dir, target, NATIVE_GEMS)
