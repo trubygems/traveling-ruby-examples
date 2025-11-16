@@ -64,7 +64,11 @@ def create_package(version, target, os_type)
   sh "cp hello.rb #{package_dir}/lib/app/"
   sh "mkdir #{package_dir}/lib/ruby"
   sh "tar -xzf packaging/traveling-ruby-#{TRAVELING_RUBY_VERSION}-#{target}.tar.gz -C #{package_dir}/lib/ruby"
-  sh "cp packaging/wrapper.sh #{package_dir}/hello"
+  if os_type == :windows
+    sh "cp packaging/wrapper.bat #{package_dir}/hello.bat"
+  else
+    sh "cp packaging/wrapper.sh #{package_dir}/hello"
+  end
   if !ENV['DIR_ONLY']
     sh "tar -czf #{package_dir}.tar.gz #{package_dir}"
     sh "rm -rf #{package_dir}"
