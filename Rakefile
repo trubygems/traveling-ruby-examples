@@ -1,43 +1,64 @@
 PACKAGE_NAME = "hello"
 VERSION = "1.0.0"
-TRAVELING_RUBY_VERSION = "20150210-2.1.5"
+TRAVELING_RUBY_VERSION = "20251107-3.4.7"
+TRAVELING_RUBY_PKG_DATE = TRAVELING_RUBY_VERSION.split("-").first
+TRAVELING_RB_VERSION = TRAVELING_RUBY_VERSION.split("-").last
+RUBY_COMPAT_VERSION = TRAVELING_RB_VERSION.split(".").first(2).join(".") + ".0"
+RUBY_MAJOR_VERSION = TRAVELING_RB_VERSION.split(".").first.to_i
+RUBY_MINOR_VERSION = TRAVELING_RB_VERSION.split(".")[1].to_i
 
-desc "Package your app"
-task :package => ['package:linux:x86', 'package:linux:x86_64', 'package:osx']
+# Platform/target definitions
+PLATFORMS = [
+  { os: :linux,   arch: :x86_64, musl: false },
+  { os: :linux,   arch: :arm64,  musl: false },
+  { os: :linux,   arch: :x86_64, musl: true  },
+  { os: :linux,   arch: :arm64,  musl: true  },
+  { os: :macos,   arch: :x86_64, musl: false },
+  { os: :macos,   arch: :arm64,  musl: false },
+  { os: :windows, arch: :x86_64, musl: false },
+  { os: :windows, arch: :arm64,  musl: false },
+]
 
-namespace :package do
-  namespace :linux do
-    desc "Package your app for Linux x86"
-    task :x86 => "packaging/traveling-ruby-#{TRAVELING_RUBY_VERSION}-linux-x86.tar.gz" do
-      create_package("linux-x86")
-    end
+def platform_name(p)
+  if p[:os] == :linux && p[:musl]
+    "linux-musl-#{p[:arch]}"
+  else
+    "#{p[:os]}-#{p[:arch]}"
+  end
+end
 
-    desc "Package your app for Linux x86_64"
-    task :x86_64 => "packaging/traveling-ruby-#{TRAVELING_RUBY_VERSION}-linux-x86_64.tar.gz" do
-      create_package("linux-x86_64")
-    end
+def package_task_name(p)
+  "package:#{platform_name(p)}"
+end
+
+def tarball_name(p)
+  "packaging/traveling-ruby-#{TRAVELING_RUBY_VERSION}-#{platform_name(p)}.tar.gz"
+end
+
+# Generate all package tasks and file rules
+PLATFORMS.each do |plat|
+  desc "Package #{PACKAGE_NAME} for #{platform_name(plat)}"
+  task package_task_name(plat) => [ tarball_name(plat) ] do
+    create_package(TRAVELING_RUBY_VERSION, platform_name(plat), plat[:os] == :windows ? :windows : :unix)
   end
 
-  desc "Package your app for OS X"
-  task :osx => "packaging/traveling-ruby-#{TRAVELING_RUBY_VERSION}-osx.tar.gz" do
-    create_package("osx")
+  file tarball_name(plat) do
+    download_runtime(TRAVELING_RUBY_VERSION, platform_name(plat))
   end
 end
 
-file "packaging/traveling-ruby-#{TRAVELING_RUBY_VERSION}-linux-x86.tar.gz" do
-  download_runtime("linux-x86")
-end
+# Meta tasks for groups
+task "package:windows" => PLATFORMS.select { |p| p[:os] == :windows }.map { |p| package_task_name(p) }
+task "package:linux"   => PLATFORMS.select { |p| p[:os] == :linux && !p[:musl] }.map { |p| package_task_name(p) }
+task "package:linux:musl" => PLATFORMS.select { |p| p[:os] == :linux && p[:musl] }.map { |p| package_task_name(p) }
+task "package:linux:glibc" => PLATFORMS.select { |p| p[:os] == :linux && !p[:musl] }.map { |p| package_task_name(p) }
+task "package:macos"   => PLATFORMS.select { |p| p[:os] == :macos }.map { |p| package_task_name(p) }
 
-file "packaging/traveling-ruby-#{TRAVELING_RUBY_VERSION}-linux-x86_64.tar.gz" do
-  download_runtime("linux-x86_64")
-end
+desc "Package #{PACKAGE_NAME} for all platforms"
+task :package => PLATFORMS.map { |p| package_task_name(p) }
 
-file "packaging/traveling-ruby-#{TRAVELING_RUBY_VERSION}-osx.tar.gz" do
-  download_runtime("osx")
-end
-
-def create_package(target)
-  package_dir = "#{PACKAGE_NAME}-#{VERSION}-#{target}"
+def create_package(version, target, os_type)
+  package_dir = "pkg/#{PACKAGE_NAME}-#{VERSION}-#{target}"
   sh "rm -rf #{package_dir}"
   sh "mkdir -p #{package_dir}/lib/app"
   sh "cp hello.rb #{package_dir}/lib/app/"
@@ -50,7 +71,7 @@ def create_package(target)
   end
 end
 
-def download_runtime(target)
+def download_runtime(version, target)
   sh "cd packaging && curl -L -O --fail " +
-    "http://d6r77u77i8pq3.cloudfront.net/releases/traveling-ruby-#{TRAVELING_RUBY_VERSION}-#{target}.tar.gz"
+     "https://github.com/YOU54F/traveling-ruby/releases/download/rel-#{TRAVELING_RUBY_PKG_DATE}/traveling-ruby-#{version}-#{target}.tar.gz"
 end
