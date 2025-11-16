@@ -71,15 +71,15 @@ jobs:
       env:
         APP_NAME: ${{ matrix.example }}
     - name: Run hello via PowerShell (Windows only)
-      if: runner.os == 'Windows'
+      if: runner.os == 'Windows' && matrix.example != 'pact_broker'
       shell: powershell
       run: |
-        powershell -Command "examples/${{ matrix.example }}/pkg/test-app/hello.bat"
+        powershell -Command "examples/${{ matrix.example }}/pkg/test-app/${{ matrix.example }}.bat"
     - name: Run hello via CMD (Windows only)
-      if: runner.os == 'Windows'
+      if: runner.os == 'Windows' && matrix.example != 'pact_broker'
       shell: cmd
       run: |
-        cmd /C examples\${{ matrix.example }}\pkg\test-app\hello.bat
+        cmd /C examples\${{ matrix.example }}\pkg\test-app\${{ matrix.example }}.bat
   
   test-win-arm:
     defaults:
@@ -110,14 +110,14 @@ jobs:
         APP_NAME: ${{ matrix.example }}
     - name: Run hello via PowerShell (Windows only)
       shell: powershell
-      if: runner.os == 'Windows'
+      if: runner.os == 'Windows' && matrix.example != 'pact_broker'
       run: |
-        powershell -Command "examples/${{ matrix.example }}/pkg/test-app/hello.bat"
+        powershell -Command "examples/${{ matrix.example }}/pkg/test-app/${{ matrix.example }}.bat"
     - name: Run hello via CMD (Windows only)
-      if: runner.os == 'Windows'
+      if: runner.os == 'Windows' && matrix.example != 'pact_broker'
       shell: cmd
       run: |
-        cmd /C examples\${{ matrix.example }}\pkg\test-app\hello.bat
+        cmd /C examples\${{ matrix.example }}\pkg\test-app\${{ matrix.example }}.bat
   
   test-linux-musl:
     needs: [package]
