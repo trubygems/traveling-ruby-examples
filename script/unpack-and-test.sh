@@ -60,4 +60,4 @@ rm -rf test-app
 mkdir -p test-app
 tar xvf *$BINARY_OS-$BINARY_ARCH.tar.gz --strip-components=2 -C test-app
 cd ../../..
-sh ./script/test.sh
+./script/test.sh

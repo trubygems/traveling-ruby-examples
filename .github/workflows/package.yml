@@ -150,7 +150,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        example: ["hello","gem"]
+        example: ["hello","gem", "native", "pact_broker"]
     steps:
     - uses: actions/checkout@v5
     - name: Download all workflow run artifacts
