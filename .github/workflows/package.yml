@@ -57,6 +57,15 @@ jobs:
       run: ./script/unpack-and-test.sh
       env:
         APP_NAME: ${{ matrix.example }}
+    - name: Run hello via PowerShell (Windows only)
+      if: runner.os == 'Windows'
+      run: |
+        powershell -Command "examples/${{ matrix.example }}/pkg/test-app/hello.bat"
+    - name: Run hello via CMD (Windows only)
+      if: runner.os == 'Windows'
+      run: |
+        cmd /C examples\${{ matrix.example }}\pkg\test-app\hello.bat
+  
   test-win-arm:
     defaults:
       run:
@@ -84,7 +93,15 @@ jobs:
         BINARY_ARCH: arm64
         BINARY_OS: windows
         APP_NAME: ${{ matrix.example }}
-
+    - name: Run hello via PowerShell (Windows only)
+      if: runner.os == 'Windows'
+      run: |
+        powershell -Command "examples/${{ matrix.example }}/pkg/test-app/hello.bat"
+    - name: Run hello via CMD (Windows only)
+      if: runner.os == 'Windows'
+      run: |
+        cmd /C examples\${{ matrix.example }}\pkg\test-app\hello.bat
+  
   test-linux-musl:
     needs: [package]
     runs-on: ubuntu-latest
