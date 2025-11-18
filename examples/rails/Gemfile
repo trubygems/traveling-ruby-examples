@@ -1,0 +1,4 @@
+source 'http://rubygems.org'
+
+gem 'rake', '~> 13.0'
+gem 'railties'

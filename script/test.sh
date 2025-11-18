@@ -61,7 +61,7 @@ tools="lib${PATH_SEPERATOR}ruby${PATH_SEPERATOR}bin${PATH_SEPERATOR}ruby ${APP_N
 for tool in $tools; do
   echo testing $tool
   if [ "$BINARY_OS" = "windows" ]; then FILE_EXT=.bat; else FILE_EXT=""; fi
-  if [ "$tool" = "lib${PATH_SEPERATOR}ruby${PATH_SEPERATOR}bin${PATH_SEPERATOR}ruby" ] || [ "$tool" = "pact_broker" ]; then test_cmd="--version"; else test_cmd=""; fi
+  if [ "$tool" = "lib${PATH_SEPERATOR}ruby${PATH_SEPERATOR}bin${PATH_SEPERATOR}ruby" ] || [ "$tool" = "pact_broker" ] || [ "$tool" = "rails" ]; then test_cmd="--version"; else test_cmd=""; fi
   echo executing ${tool}${FILE_EXT}
   ${PATH_TO_BIN}${tool}${FILE_EXT} $test_cmd
 done
@@ -88,5 +88,30 @@ if [ -f "${PATH_TO_BIN}pact_broker${FILE_EXT}" ]; then
     taskkill //F //PID "$(cat broker.pid)"
     else
     kill $(cat broker.pid)
+    fi
+fi
+
+# test a new rails app by starting it, and making a http request
+if [ -f "${PATH_TO_BIN}rails${FILE_EXT}" ]; then
+
+    if [ "$BINARY_OS" = "windows" ]; then
+    ${PATH_TO_BIN}rails${FILE_EXT} server -P rails.pid &
+    else
+    ${PATH_TO_BIN}rails${FILE_EXT} server -D -P rails.pid
+    fi
+
+    for i in {1..30}; do
+    if curl -s http://localhost:3000/ >/dev/null; then
+        break
+    fi
+    sleep 1
+    done
+
+    curl -s http://localhost:3000/
+
+    if [ "$BINARY_OS" = "windows" ]; then
+    taskkill //F //PID "$(cat rails.pid)"
+    else
+    kill $(cat rails.pid)
     fi
 fi
