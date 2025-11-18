@@ -110,8 +110,8 @@ if [ -f "${PATH_TO_BIN}rails${FILE_EXT}" ]; then
     curl -s http://localhost:3000/
 
     if [ "$BINARY_OS" = "windows" ]; then
-    taskkill //F //PID "$(cat rails.pid)"
+    taskkill //F //PID "$(cat ${PATH_TO_BIN}${PATH_SEPERATOR}lib${PATH_SEPERATOR}app${PATH_SEPERATOR}rails.pid)"
     else
-    kill $(cat rails.pid)
+    kill $(cat ${PATH_TO_BIN}${PATH_SEPERATOR}lib${PATH_SEPERATOR}app${PATH_SEPERATOR}rails.pid)
     fi
 fi
