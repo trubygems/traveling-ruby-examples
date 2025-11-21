@@ -58,6 +58,6 @@ cd examples/$APP_NAME/pkg
 ls
 rm -rf test-app
 mkdir -p test-app
-tar xvf *$BINARY_OS-$BINARY_ARCH.tar.gz --strip-components=2 -C test-app
+tar xf *$BINARY_OS-$BINARY_ARCH.tar.gz --strip-components=2 -C test-app
 cd ../../..
 ./script/test.sh

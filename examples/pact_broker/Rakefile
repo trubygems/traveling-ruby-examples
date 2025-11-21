@@ -24,7 +24,7 @@ NATIVE_GEM_VERSIONS = {
   puma: '7.1.0',
   racc: '1.8.1',
   redcarpet: '3.6.1',
-  stringio: '3.1.7',
+  stringio: '3.1.8',
   sqlite3: '2.8.0',
   thin: '2.0.1',
 }
@@ -136,7 +136,8 @@ def create_package(version, target, os_type)
   sh "cp packaging/bundler-config #{package_dir}/lib/vendor/.bundle/config"
   download_and_unpack_ext(package_dir, target, NATIVE_GEMS)
   if !ENV['DIR_ONLY']
-    sh "tar -czf #{package_dir}.tar.gz #{package_dir}"
+    # https://unix.stackexchange.com/questions/282055/a-lot-of-files-inside-a-tar
+    sh "#{RUBY_PLATFORM =~ /darwin/ ? 'COPYFILE_DISABLE=1' : ''} tar -czf #{package_dir}.tar.gz #{package_dir}"
     sh "rm -rf #{package_dir}"
   end
 end
@@ -164,11 +165,13 @@ def download_and_unpack_ext(package_dir, target, native_gems)
       sh "mkdir -p #{gem_dir} #{spec_dir}"
       # Unpack gem contents
       sh "rm -rf #{gem_dir}/#{native_gem}"
-      sh "mkdir -p #{gem_dir}/#{native_gem}"
+      sh "mkdir -p #{gem_dir}/#{native_gem_alt}"
       wildcards_flag = RUBY_PLATFORM =~ /linux/ ? "--wildcards" : ""
-      sh "tar -xzf #{tarball} #{wildcards_flag} --strip-components=1 -C #{gem_dir}/#{native_gem} 'nokogiri-*'"
+      sh "tar -xzf #{tarball} #{wildcards_flag} --strip-components=1 -C #{gem_dir}/#{native_gem_alt} 'nokogiri-*'"
       # Unpack gemspec
       sh "tar -xzf #{tarball} #{wildcards_flag} --strip-components=0 -C #{spec_dir} 'nokogiri-*.gemspec'"
+      # remove ruby gemspec
+      sh "rm -f #{spec_dir}/#{native_gem}.gemspec"
     else
       sh "tar -xzf #{tarball} -C #{package_dir}/lib/vendor/ruby"
     end
