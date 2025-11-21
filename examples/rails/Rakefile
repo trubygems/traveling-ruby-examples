@@ -182,8 +182,9 @@ def download_and_unpack_ext(package_dir, target, native_gems)
     is_windows = target.include?("windows")
     is_arm64 = target.include?("arm64")
     is_nokogiri = native_gem.start_with?("nokogiri-")
-    tarball = "build/traveling-ruby-#{TRAVELING_RUBY_VERSION}-#{target}-#{native_gem}.tar.gz"
-    url = "https://github.com/trubygems/traveling-ruby/releases/download/rel-#{TRAVELING_RUBY_PKG_DATE}/traveling-ruby-gems-#{TRAVELING_RUBY_VERSION}-#{target}-#{native_gem}.tar.gz"
+    native_gem_alt = is_windows && is_nokogiri && is_arm64 ? "#{native_gem}-aarch64-mingw-ucrt" : native_gem
+    tarball = "build/traveling-ruby-gems-#{TRAVELING_RUBY_VERSION}-#{target}-#{native_gem_alt}.tar.gz"
+    url = "https://github.com/trubygems/traveling-ruby/releases/download/rel-#{TRAVELING_RUBY_PKG_DATE}/traveling-ruby-gems-#{TRAVELING_RUBY_VERSION}-#{target}-#{native_gem_alt}.tar.gz"
 
     sh "curl -L --fail #{url} -o #{tarball}"
 
